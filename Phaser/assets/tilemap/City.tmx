@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<map version="1.0" orientation="orthogonal" renderorder="right-down" width="32" height="32" tilewidth="32" tileheight="32" nextobjectid="1">
+ <tileset firstgid="1" name="magecity" tilewidth="32" tileheight="32" tilecount="360" columns="8">
+  <image source="../../../../../../Downloads/magecity.png" width="256" height="1450"/>
+ </tileset>
+ <layer name="Layer_1" width="32" height="32">
+  <data encoding="base64" compression="zlib">
+   eJxjYBgFIx28AGImOmBGNDxq/6j9o/aP2j9q/8iwHx2P2o+wHz1uCOFR++ln/w0i7CfV/ej5D5+6B3S0nwGNBmF5xoH1PzHxP2o/+faPgpELAB+5HBo=
+  </data>
+ </layer>
+ <layer name="Collide_1" width="32" height="32">
+  <data encoding="base64" compression="zlib">
+   eJztl7sKwkAQRWcLO4t0WsS3EdTKTxD9cVEbe7UyVupvOMIsDsuiETZ3LfbCITeT4hCYZvZEdIjEjtkyY6YAM2E24h8wQzAj5Z8yMzBz5Y+V5E/+5P8P/8oQrc3np+11+H9Jl8k9sxD+TPg2CxHXn3m6b2bTYtoB/dZR9f97TD+wHxl3/6vi7lqHwu0fMsn/9h+Zk1Cqfgb5L+It5d32K8h/Y+4Cqf4A+V9pON+bNbp9fnSSP34WBn976ht0afC3n74Bn4PIczI=
+  </data>
+ </layer>
+ <layer name="Collide_2" width="32" height="32">
+  <data encoding="base64" compression="zlib">
+   eJzt1DEKgDAMRuFOdbPn9yjqpE7qpUzBIRSEDvbv8j54CF2SxYQAAACiNVS8tTJaqeIN/5utxbWKZ2/W7jqEO+TZp3W57ncHhXK23wFAG+XNU5Zv29d/r8jflqnTt7cHW01NqA==
+  </data>
+ </layer>
+ <layer name="Layer_2" width="32" height="32">
+  <data encoding="base64" compression="zlib">
+   eJztzqENACAMRNEyGKAAyZoIJANSEgwLUNH/kktz6ioCAADg27B+AGbmvS28/Zd1bw9v/ylqkiYbbB9FUzXNaB/wZAPgFQWN
+  </data>
+ </layer>
+ <layer name="Layer_3" width="32" height="32">
+  <data encoding="base64" compression="zlib">
+   eJxjYBgFo2AUjIJRMJDAmpGBwYYRPw1jDzQQA2IRLGKjYBSQC0hJ/+hpTZRhNP3REiwfaAcMMBjp/h8Fo2AUDE8AAIoFBwI=
+  </data>
+ </layer>
+ <layer name="Collide_3" width="32" height="32">
+  <data encoding="base64" compression="zlib">
+   eJztwQENAAAAwqD3T20PBxQAAADwbhAAAAE=
+  </data>
+ </layer>
+ <layer name="Layer_4" width="32" height="32">
+  <data encoding="base64" compression="zlib">
+   eJztzjEBAAAMAiD7p1jUxfAQEpAAAHRdOwAAAx62PACh
+  </data>
+ </layer>
+</map>

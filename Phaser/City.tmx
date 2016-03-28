@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<map version="1.0" orientation="orthogonal" renderorder="right-down" width="32" height="32" tilewidth="32" tileheight="32" nextobjectid="1">
+ <tileset firstgid="1" name="magecity" tilewidth="32" tileheight="32" tilecount="360" columns="8">
+  <image source="../../../../Downloads/magecity.png" width="256" height="1450"/>
+ </tileset>
+ <layer name="Layer_1" width="32" height="32">
+  <data encoding="base64" compression="zlib">
+   eJxjYBgFIx28AGImOmBGNDxq/6j9o/aP2j9q/8iwHx2P2o+wHz1uCOFR++ln/w0i7CfV/ej5D5+6B3S0/xkaDcLyjAPrf2Lif9R+8u0fBSMXAAAsMh3m
+  </data>
+ </layer>
+ <layer name="Collide_1" width="32" height="32">
+  <data encoding="base64" compression="zlib">
+   eJztlz0LwjAQhu8GN4cOWh38/gJ1cq6L1D8u6uKuTuqk/g3fYoMhhFppvC554SHXJOShcMvtiehQEjuwBSMwFmYCNqm/DwbCDDX/FMyEmWv+suL93u/970RMtOTsVdX/8Md4d83Zq6pD3K8Zb4UF/b+kA1qWPRf+IOXbnouY/sBS2/ZUGqDp0K8cef+/C3qO/BHnx+y1OhXvv5jzY/Zam9z1n2S8/+M/gpOFs5D/Aq4WbkL+O3gY58n3U8ifpGKcV//otvml4/3lZ8Hys6c+g65YfvbTZ8AXfHd36g==
+  </data>
+ </layer>
+ <layer name="Collide_2" width="32" height="32">
+  <data encoding="base64" compression="zlib">
+   eJzt1DEKgDAMRuFOdbPn9yjqpE7qpUzBIRSEDvbv8j54CF2SxYQAAACiNVS8tTJaqeIN/5utxbWKZ2/W7jqEO+TZp3W57ncHhXK23wFAG+XNU5Zv29d/r8jflqnTt7cHW01NqA==
+  </data>
+ </layer>
+ <layer name="Layer_2" width="32" height="32">
+  <data encoding="base64" compression="zlib">
+   eJxjYBgFo2AUjIJRMApGwSgYWLBggO1fMcD2D0awfKAdQCewBkq7M6Ly6eX/LVDanxGVT09gC8R2QGw/AHaDgCsQuwGx+wDZPwpGwUgCAITRB3s=
+  </data>
+ </layer>
+ <layer name="Layer_3" width="32" height="32">
+  <data encoding="base64" compression="zlib">
+   eJztwQENAAAAwqD3T20PBxQAAADwbhAAAAE=
+  </data>
+ </layer>
+ <layer name="Collide_3" width="32" height="32">
+  <data encoding="base64" compression="zlib">
+   eJztwQENAAAAwqD3T20PBxQAAADwbhAAAAE=
+  </data>
+ </layer>
+</map>

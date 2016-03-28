@@ -1,0 +1,21 @@
+{
+  "name": "Phaser",
+  "homepage": "https://github.com/EJanuszewski/WebPlayground",
+  "authors": [
+    "Edward Januszewski <e.januszewski@gmail.com>"
+  ],
+  "description": "",
+  "main": "",
+  "moduleType": [],
+  "license": "MIT",
+  "ignore": [
+    "**/.*",
+    "node_modules",
+    "bower_components",
+    "test",
+    "tests"
+  ],
+  "dependencies": {
+    "phaser": "^2.4.6"
+  }
+}
