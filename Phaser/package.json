@@ -1,0 +1,22 @@
+{
+  "name": "browser-royale",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "",
+  "license": "MIT",
+  "dependencies": {
+    "deepstream.io": "^0.8.1",
+    "express": "^4.13.4",
+    "phaser": "^2.4.6",
+    "socket.io": "^1.4.5",
+    "socket.io-client": "^1.4.5"
+  },
+  "devDependencies": {
+    "tern": "^0.18.0",
+    "tern-phaser": "^0.2.0"
+  }
+}

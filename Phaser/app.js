@@ -1,4 +1,7 @@
-var cursors, player, layers = [], map, spacebar;
+var cursors, player, layers = [], tickRate, map, spacebar;
+
+var enemies = {},
+    tickrate = 33;
 
 //Player object
 var playerProp = {
@@ -9,6 +12,8 @@ var playerProp = {
 var game = new Phaser.Game(1024, 1024, Phaser.AUTO, '', { preload: preload, create: create, update: update });
 
 function preload() {
+
+  game.stage.disableVisibilityChange = true;
 
   //Load standard layers
   game.load.tilemap('layer-1', 'assets/tilemap/city_Layer_1.csv', null, Phaser.Tilemap.CSV);
@@ -106,6 +111,17 @@ function create() {
     map.addTilesetImage('tiles');
     layer = map.createLayer(0);
     layer.resizeWorld();
+  });
+
+  var socket = io('localhost:3000');
+  socket.on('connected',function(data){
+    userId=data;
+    setInterval(function(){
+      socket.emit('client-tick',{x:player.x,y:player.y,d:playerProp.direction,v:player.body.velocity});
+    },15);
+  });
+  socket.on('server-tick',function(data){
+    updatePlayers(data);
   });
 
 }
@@ -213,4 +229,43 @@ function hitSkeleton(player, skeleton) {
 
 
 
+}
+
+
+
+
+
+function updatePlayers(serverData){
+  for(var propt in enemies){
+    //if the enemy is not in serverdata it needs to be removed
+    if(!serverData[propt])
+    {
+      enemies[propt].destroy();
+      delete enemies[propt];
+    }
+  }
+  for(var propt in serverData){
+    if(propt == userId)
+      continue;
+    if(!enemies[propt])
+    {
+      enemies[propt] = game.add.sprite(serverData[propt].x, serverData[propt].y, 'player');
+      enemies[propt].scale.x = .5;
+      enemies[propt].scale.y = .5;
+      game.physics.enable(enemies[propt], Phaser.Physics.ARCADE);
+
+      enemies[propt].animations.add('left', [117, 118, 119, 120, 121, 122, 123, 124, 125], 15, true);
+      enemies[propt].animations.add('right', [143, 144, 145, 146, 147, 148, 149, 150, 151], 15, true);
+      enemies[propt].animations.add('up', [104, 105, 106, 107, 108, 109, 110, 111, 112], 30, true);
+      enemies[propt].animations.add('down', [130, 131, 132, 133, 134, 135, 136, 137, 138], 30, true);
+
+    }
+    enemies[propt].x = serverData[propt].x;
+    enemies[propt].y = serverData[propt].y;
+    if(serverData[propt].v.x !== 0 || serverData[propt].v.y !== 0)
+      enemies[propt].animations.play(serverData[propt].d);
+    else
+      enemies[propt].animations.stop();
+    //game.add.tween(enemies[propt]).to( { x: serverData[propt].x, y: serverData[propt].y }, 30, Phaser.Easing.NONE, true);
+  }
 }
