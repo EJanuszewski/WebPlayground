@@ -1,4 +1,4 @@
-var cursors, player, layers = [], tickRate, map, spacebar;
+var cursors, player, layers = [], tickRate, map, spacebar, radians, doorMap;
 
 var enemies = {},
     tickrate = 33;
@@ -9,7 +9,7 @@ var playerProp = {
   direction: 'down'
 }
 
-var game = new Phaser.Game(1024, 1024, Phaser.AUTO, '', { preload: preload, create: create, update: update });
+var game = new Phaser.Game(800, 800, Phaser.AUTO, '', { preload: preload, create: create, update: update });
 
 function preload() {
 
@@ -54,13 +54,18 @@ function create() {
       layers.push(layer);
       map.setCollisionByExclusion([-1]);
     }
+
+    if(tilemap === 'layer-2') {
+      console.log('k')
+      map.setTileIndexCallback(-1, enterDoor, this, layer);
+      map.setTileLocationCallback(5, 27, 1, 1, enterDoor, this);
+    }
   });
 
   //player = game.add.sprite(64, 128, 'player'); //64, 128 gives us the top left, going to move bottom left at house for now
   player = game.add.sprite(64, 832, 'player');
   player.scale.x = .5;
   player.scale.y = .5;
-  //player.anchor.setTo(0.5, 0.5);
 
   //Set the default to facing down
   player.frame = 13 * 6; //Each row has 13 images, it's row 6
@@ -87,12 +92,12 @@ function create() {
   skeleton.animations.add('right', [143, 144, 145, 146, 147, 148, 149, 150, 151], 15, true);
   skeleton.animations.add('up', [104, 105, 106, 107, 108, 109, 110, 111, 112], 30, true);
   skeleton.animations.add('down', [130, 131, 132, 133, 134, 135, 136, 137, 138], 30, true);
-  skeleton.immovable = true;
 
   game.physics.startSystem(Phaser.Physics.ARCADE);
   game.physics.enable(player, Phaser.Physics.ARCADE);
   game.physics.enable(skeleton, Phaser.Physics.ARCADE);
 	game.time.advancedTiming = true;
+  game.camera.follow(player);
 
   cursors = game.input.keyboard.createCursorKeys(); //Add default cursor keys
   //Add spacebar
@@ -100,6 +105,7 @@ function create() {
 
   //This has to be done after physics are enabled, duh
   player.body.setSize(32, 32, 8, 16);
+  skeleton.body.setSize(32, 32, 8, 16);
 
   //Now load the 'over everything tilemaps'
   var tilemapsOver = [
@@ -132,10 +138,44 @@ function update() {
     game.physics.arcade.collide(skeleton, layer);
   });
 
-  game.physics.arcade.collide(player, skeleton, hitSkeleton(player, skeleton), null, this);
+  //game.physics.arcade.collide(player, skeleton, hitSkeleton(player, skeleton), null, this);
+  game.physics.arcade.moveToObject(skeleton, player);
+
+  angle = game.physics.arcade.angleToXY(skeleton, player.body.position.x, player.body.position.y) * 57.2956455309;
+
+  game.debug.text(angle, 600, 14, "#00ff00");
+
+  if((angle >= 135 && angle <= 180) || (angle >= -45 && angle <= 45) || (angle <= -135 && angle >= -180) || (skeleton.body.blocked.up || skeleton.body.blocked.down)) {
+    skeleton.body.maxVelocity = new Phaser.Point(60, 0);
+    if(angle <= 45 && angle >= -45)
+      skeleton.body.velocity.x = 64;
+    else
+      skeleton.body.velocity.x = -64;
+  } else if((angle > 45 && angle < 135) || (angle >= -135 && angle <= -45) || (skeleton.body.blocked.left || skeleton.body.blocked.right)) {
+    skeleton.body.maxVelocity = new Phaser.Point(0, 60);
+    if(angle > -135 && angle < -45)
+      skeleton.body.velocity.y = -64;
+    else
+      skeleton.body.velocity.y = 64;
+  }
+
+  if(skeleton.deltaX < 0) {
+    skeleton.animations.play('left');
+  } else if(skeleton.deltaX > 0) {
+    skeleton.animations.play('right');
+  } else if(skeleton.deltaY > 0) {
+    skeleton.animations.play('down');
+  } else if(skeleton.deltaY < 0) {
+    skeleton.animations.play('up');
+  } else {
+    skeleton.animations.stop();
+  }
 
   player.body.velocity.set(0);
   playerProp.speed = 64;
+
+  if(game.input.keyboard.isDown(Phaser.Keyboard.SHIFT))
+    playerProp.speed = 128
 
   if (cursors.left.isDown)
   {
@@ -144,8 +184,6 @@ function update() {
       player.body.velocity.x = playerProp.speed * -.33; //1/3 speed whilst attacking
       player.animations.play('attack-left');
     } else {
-      if(cursors.left.shiftKey)
-        playerProp.speed = 128
 
       player.body.velocity.x = playerProp.speed * -1;
       player.animations.play('left');
@@ -159,15 +197,7 @@ function update() {
       //Attack
       player.body.velocity.x = playerProp.speed * .33; //1/3 speed whilst attacking
       player.animations.play('attack-right');
-      //See if they are attacking the right way
-      if(player.body.touching.right && playerProp.direction === 'right') {
-        if(skeleton.body.touching.left) {
-          skeleton.destroy(); //Get rekt mr skeletal
-        }
-      }
     } else {
-      if(cursors.right.shiftKey)
-        playerProp.speed = 128
 
       player.body.velocity.x = playerProp.speed;
       player.animations.play('right');
@@ -182,8 +212,6 @@ function update() {
       player.body.velocity.y = playerProp.speed * -.33; //1/3 speed whilst attacking
       player.animations.play('attack-up');
     } else {
-      if(cursors.up.shiftKey)
-        playerProp.speed = 128
 
       player.body.velocity.y = playerProp.speed * -1;
       player.animations.play('up');
@@ -198,8 +226,6 @@ function update() {
       player.body.velocity.y = playerProp.speed * .33; //1/3 speed whilst attacking
       player.animations.play('attack-down');
     } else {
-      if(cursors.down.shiftKey)
-        playerProp.speed = 128
 
       player.body.velocity.y = playerProp.speed;
       player.animations.play('down');
@@ -225,15 +251,12 @@ function update() {
 
 }
 
-function hitSkeleton(player, skeleton) {
+function enterDoor() {
 
+  console.log('yo');
 
 
 }
-
-
-
-
 
 function updatePlayers(serverData){
   for(var propt in enemies){
