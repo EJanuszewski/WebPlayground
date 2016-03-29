@@ -6,10 +6,11 @@ var enemies = {},
 //Player object
 var playerProp = {
   speed: 64,
-  direction: 'down'
+  direction: 'down',
+  locked: false
 }
 
-var game = new Phaser.Game(800, 800, Phaser.AUTO, '', { preload: preload, create: create, update: update });
+var game = new Phaser.Game(768, 768, Phaser.AUTO, '', { preload: preload, create: create, update: update });
 
 function preload() {
 
@@ -56,9 +57,8 @@ function create() {
     }
 
     if(tilemap === 'layer-2') {
-      console.log('k')
-      map.setTileIndexCallback(-1, enterDoor, this, layer);
-      map.setTileLocationCallback(5, 27, 1, 1, enterDoor, this);
+      map.setCollision(326);
+      doorMap = layer;
     }
   });
 
@@ -138,6 +138,8 @@ function update() {
     game.physics.arcade.collide(skeleton, layer);
   });
 
+  game.physics.arcade.collide(player, doorMap, enterDoor);
+
   //game.physics.arcade.collide(player, skeleton, hitSkeleton(player, skeleton), null, this);
   game.physics.arcade.moveToObject(skeleton, player);
 
@@ -171,76 +173,79 @@ function update() {
     skeleton.animations.stop();
   }
 
-  player.body.velocity.set(0);
-  playerProp.speed = 64;
+  if(!playerProp.locked) {
 
-  if(game.input.keyboard.isDown(Phaser.Keyboard.SHIFT))
-    playerProp.speed = 128
+    player.body.velocity.set(0);
+    playerProp.speed = 64;
 
-  if (cursors.left.isDown)
-  {
-    if(game.input.keyboard.isDown(Phaser.Keyboard.SPACEBAR)) {
-      //Attack
-      player.body.velocity.x = playerProp.speed * -.33; //1/3 speed whilst attacking
-      player.animations.play('attack-left');
-    } else {
+    if(game.input.keyboard.isDown(Phaser.Keyboard.SHIFT))
+      playerProp.speed = 128
 
-      player.body.velocity.x = playerProp.speed * -1;
-      player.animations.play('left');
+    if (cursors.left.isDown)
+    {
+      if(game.input.keyboard.isDown(Phaser.Keyboard.SPACEBAR)) {
+        //Attack
+        player.body.velocity.x = playerProp.speed * -.33; //1/3 speed whilst attacking
+        player.animations.play('attack-left');
+      } else {
 
-      playerProp.direction = 'left';
+        player.body.velocity.x = playerProp.speed * -1;
+        player.animations.play('left');
+
+        playerProp.direction = 'left';
+      }
     }
-  }
-  else if (cursors.right.isDown)
-  {
-    if(game.input.keyboard.isDown(Phaser.Keyboard.SPACEBAR)) {
-      //Attack
-      player.body.velocity.x = playerProp.speed * .33; //1/3 speed whilst attacking
-      player.animations.play('attack-right');
-    } else {
+    else if (cursors.right.isDown)
+    {
+      if(game.input.keyboard.isDown(Phaser.Keyboard.SPACEBAR)) {
+        //Attack
+        player.body.velocity.x = playerProp.speed * .33; //1/3 speed whilst attacking
+        player.animations.play('attack-right');
+      } else {
 
-      player.body.velocity.x = playerProp.speed;
-      player.animations.play('right');
+        player.body.velocity.x = playerProp.speed;
+        player.animations.play('right');
 
-      playerProp.direction = 'right';
+        playerProp.direction = 'right';
+      }
     }
-  }
-  else if (cursors.up.isDown)
-  {
-    if(game.input.keyboard.isDown(Phaser.Keyboard.SPACEBAR)) {
-      //Attack
-      player.body.velocity.y = playerProp.speed * -.33; //1/3 speed whilst attacking
-      player.animations.play('attack-up');
-    } else {
+    else if (cursors.up.isDown)
+    {
+      if(game.input.keyboard.isDown(Phaser.Keyboard.SPACEBAR)) {
+        //Attack
+        player.body.velocity.y = playerProp.speed * -.33; //1/3 speed whilst attacking
+        player.animations.play('attack-up');
+      } else {
 
-      player.body.velocity.y = playerProp.speed * -1;
-      player.animations.play('up');
+        player.body.velocity.y = playerProp.speed * -1;
+        player.animations.play('up');
 
-      playerProp.direction = 'up';
+        playerProp.direction = 'up';
+      }
     }
-  }
-  else if (cursors.down.isDown)
-  {
-    if(game.input.keyboard.isDown(Phaser.Keyboard.SPACEBAR)) {
-      //Attack
-      player.body.velocity.y = playerProp.speed * .33; //1/3 speed whilst attacking
-      player.animations.play('attack-down');
-    } else {
+    else if (cursors.down.isDown)
+    {
+      if(game.input.keyboard.isDown(Phaser.Keyboard.SPACEBAR)) {
+        //Attack
+        player.body.velocity.y = playerProp.speed * .33; //1/3 speed whilst attacking
+        player.animations.play('attack-down');
+      } else {
 
-      player.body.velocity.y = playerProp.speed;
-      player.animations.play('down');
+        player.body.velocity.y = playerProp.speed;
+        player.animations.play('down');
 
-      playerProp.direction = 'down';
+        playerProp.direction = 'down';
+      }
     }
-  }
-  else
-  {
-    if(game.input.keyboard.isDown(Phaser.Keyboard.SPACEBAR)) {
-      //Not moving but still attacking
-      player.animations.play('attack-' + playerProp.direction);
+    else
+    {
+      if(game.input.keyboard.isDown(Phaser.Keyboard.SPACEBAR)) {
+        //Not moving but still attacking
+        player.animations.play('attack-' + playerProp.direction);
 
-    } else {
-      player.animations.stop();
+      } else {
+        player.animations.stop();
+      }
     }
   }
 
@@ -253,8 +258,29 @@ function update() {
 
 function enterDoor() {
 
-  console.log('yo');
+  game.camera.unfollow();
+  var houseExit = new Phaser.Point(840, 732);
+  var houseEnt = new Phaser.Point(168, 732);
 
+  playerProp.locked = true;
+
+  player.animations.play('down');
+  player.animations.stop();
+
+  console.log(houseExit, player.position);
+
+  if(player.position.x > houseEnt.x) {
+    //Need to see if in radius, rather than a specific point
+    player.body.position = houseExit;
+  } else {
+    player.body.position = houseEnt;
+  }
+
+  game.add.tween(game.camera).to(player.body.position, 750, Phaser.Easing.Quadratic.InOut, true).onComplete.add(() => {
+    //Fix issue of not going to correct place
+    game.camera.follow(player);
+    playerProp.locked = false;
+  });
 
 }
 

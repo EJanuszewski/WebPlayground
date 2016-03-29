@@ -5,27 +5,27 @@
  </tileset>
  <layer name="Layer_1" width="32" height="32">
   <data encoding="base64" compression="zlib">
-   eJxjYBgFIx28AGImOmBGNDxq/6j9o/aP2j9q/8iwHx2P2o+wHz1uCOFR++ln/w0i7CfV/ej5D5+6B3S0nwGNBmF5xoH1PzHxP2o/+faPgpELAB+5HBo=
+   eJxjYBgFIx28AGImOmBGNDxq/6j9o/aP2j9q/8iwHx2P2o+wHz1uCOFR++ln/w0i7CfV/TdIsP8BDex/gMN+BjQahOUZqW+/PFIBRI34J1U/kvUj3v5RMHIBAN7JHe8=
   </data>
  </layer>
  <layer name="Collide_1" width="32" height="32">
   <data encoding="base64" compression="zlib">
-   eJztl7sKwkAQRWcLO4t0WsS3EdTKTxD9cVEbe7UyVupvOMIsDsuiETZ3LfbCITeT4hCYZvZEdIjEjtkyY6YAM2E24h8wQzAj5Z8yMzBz5Y+V5E/+5P8P/8oQrc3np+11+H9Jl8k9sxD+TPg2CxHXn3m6b2bTYtoB/dZR9f97TD+wHxl3/6vi7lqHwu0fMsn/9h+Zk1Cqfgb5L+It5d32K8h/Y+4Cqf4A+V9pON+bNbp9fnSSP34WBn976ht0afC3n74Bn4PIczI=
+   eJztl7sKAjEQRSeFncV2Wvh+gVr5CaI/Lmpjr1Zqpf6Gt0hwCMFEEmcXzIXDDgM7h2WnmT0RHUpiB7ZgBMbCTMBG+/tgIMyQ+adgJsyc+ctK9md/9lfDv1JEa/X5aepf+L9JB7QcvRT+QuPrpYjtLxy1q2fSAM2EfuMI/f4u6CX2S8be/1DsXWtTuv2TTPa//Udw0hCrzxHzfTO5/wKuGmL1LcLvm8n9d/DQEKufEX7fTPv/16z36xHukJlV2r9/9ZedhZK/PfkNulTytx+/AV8tXIIB
   </data>
  </layer>
  <layer name="Collide_2" width="32" height="32">
   <data encoding="base64" compression="zlib">
-   eJzt1DEKgDAMRuFOdbPn9yjqpE7qpUzBIRSEDvbv8j54CF2SxYQAAACiNVS8tTJaqeIN/5utxbWKZ2/W7jqEO+TZp3W57ncHhXK23wFAG+XNU5Zv29d/r8jflqnTt7cHW01NqA==
+   eJxjYBgFo2AUjIJRMApGARsQsxMhRivAB8T8RIiNAuqDnUC8CwnvpqOZIHUHgfgQEj5MoRtIMROk7iQQn0LCp6HqyQWkmImuDlk9uYAWZo6CUTCcAHr5RE8MKodw5VF6YORyYOYA0QMNAPYjYYQ=
   </data>
  </layer>
  <layer name="Layer_2" width="32" height="32">
   <data encoding="base64" compression="zlib">
-   eJztzqENACAMRNEyGKAAyZoIJANSEgwLUNH/kktz6ioCAADg27B+AGbmvS28/Zd1bw9v/ylqkiYbbB9FUzXNaB/wZAPgFQWN
+   eJxjYBgFo2AUjIJRMApGwSgY2WDFQDtgFAwYWAOl3RlR+fQycwuU9mdE5VMCSDXTFojtgNieCnaTY6YrELsBsTsV7aeFmaNgFAwHAACHjwpx
   </data>
  </layer>
  <layer name="Layer_3" width="32" height="32">
   <data encoding="base64" compression="zlib">
-   eJxjYBgFo2AUjIJRMJDAmpGBwYYRPw1jDzQQA2IRLGKjYBSQC0hJ/+hpTZRhNP3REiwfaAcMMBjp/h8Fo2AUDE8AAIoFBwI=
+   eJxjYBgFo2AUjIJRMJDAmpGBwYYRPw1jDzQQA2IRLGKjYBSQC0hJ/+hpTZRhNP3REiwnQ88yqrti4MBI9/8oGAWjYHgCADpOCE4=
   </data>
  </layer>
  <layer name="Collide_3" width="32" height="32">
