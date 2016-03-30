@@ -1,13 +1,16 @@
-var cursors, player, layers = [], tickRate, map, spacebar, radians, doorMap, insideMap;
+var cursors, player, layers = [], tickRate, map, spacebar, radians, doorMap, insideMap, skeletonArea, health, dieAnim;
 
 var enemies = {},
     tickrate = 33;
+
+var skeletons = [];
 
 //Player object
 var playerProp = {
   speed: 64,
   direction: 'down',
-  locked: false
+  locked: false,
+  health: 100
 }
 
 var game = new Phaser.Game(768, 768, Phaser.AUTO, '', { preload: preload, create: create, update: update });
@@ -40,6 +43,9 @@ function preload() {
   //Skeleton
   game.load.spritesheet('skeleton', 'assets/sprites/skeleton.png', 64, 64);
   //http://gaurav.munjal.us/Universal-LPC-Spritesheet-Character-Generator/#?clothes=none&legs=none&shoes=none&hat=none&weapon=dagger&hair=none&body=skeleton&eyes=red&spikes=none&shield=on
+
+  game.load.spritesheet('health', 'assets/sprites/health.png', 32, 4);
+
 }
 function create() {
 
@@ -75,6 +81,10 @@ function create() {
   player.scale.x = .5;
   player.scale.y = .5;
 
+  health = game.add.sprite(32, 4, 'health');
+  health.anchor.setTo(.5,.5);
+  player.addChild(health);
+
   //Set the default to facing down
   player.frame = 13 * 6; //Each row has 13 images, it's row 6
 
@@ -83,6 +93,8 @@ function create() {
   player.animations.add('right', [143, 144, 145, 146, 147, 148, 149, 150, 151], 15, true);
   player.animations.add('up', [104, 105, 106, 107, 108, 109, 110, 111, 112], 30, true);
   player.animations.add('down', [130, 131, 132, 133, 134, 135, 136, 137, 138], 30, true);
+  dieAnim = player.animations.add('die', [260, 261, 262, 263, 264, 265]);
+  //dieAnim.onLoop.add(killPlayer, this);
 
   //Melee animations
   player.animations.add('attack-left', [169, 170, 171, 172, 173, 174], 15, true);
@@ -91,21 +103,39 @@ function create() {
   player.animations.add('attack-down', [182, 183, 184, 185, 186, 187], 15, true);
 
   //Add in the spooky skeleton, woaaaa, 3spooky4me
-  skeleton = game.add.sprite(768, 704, 'skeleton');
-  skeleton.scale.x = .5;
-  skeleton.scale.y = .5;
+  for (var i = 0; i < 24; i++) {
 
-  //Add the animations
-  skeleton.animations.add('left', [117, 118, 119, 120, 121, 122, 123, 124, 125], 15, true);
-  skeleton.animations.add('right', [143, 144, 145, 146, 147, 148, 149, 150, 151], 15, true);
-  skeleton.animations.add('up', [104, 105, 106, 107, 108, 109, 110, 111, 112], 30, true);
-  skeleton.animations.add('down', [130, 131, 132, 133, 134, 135, 136, 137, 138], 30, true);
+    skeleton = game.add.sprite((i * 32) + 32, 256, 'skeleton');
+    skeleton.scale.x = .5;
+    skeleton.scale.y = .5;
+    skeleton.properties = {};
+
+    skeleton.properties.area = new Phaser.Circle(skeleton.position.x, skeleton.position.y, 44);
+
+    //Add the animations
+    skeleton.animations.add('left', [117, 118, 119, 120, 121, 122, 123, 124, 125], 15, true);
+    skeleton.animations.add('right', [143, 144, 145, 146, 147, 148, 149, 150, 151], 15, true);
+    skeleton.animations.add('up', [104, 105, 106, 107, 108, 109, 110, 111, 112], 30, true);
+    skeleton.animations.add('down', [130, 131, 132, 133, 134, 135, 136, 137, 138], 30, true);
+
+    //Melee animations
+    skeleton.animations.add('attack-left', [169, 170, 171, 172, 173, 174], 15, true);
+    skeleton.animations.add('attack-right', [195, 196, 197, 198, 199, 200], 15, true);
+    skeleton.animations.add('attack-up', [156, 157, 158, 159, 160, 161], 15, true);
+    skeleton.animations.add('attack-down', [182, 183, 184, 185, 186, 187], 15, true);
+
+    skeletons.push(skeleton);
+
+  }
 
   game.physics.startSystem(Phaser.Physics.ARCADE);
   game.physics.enable(player, Phaser.Physics.ARCADE);
-  game.physics.enable(skeleton, Phaser.Physics.ARCADE);
 	game.time.advancedTiming = true;
   game.camera.follow(player);
+
+  skeletons.forEach(function(skeleton) {
+    game.physics.enable(skeleton, Phaser.Physics.ARCADE);
+  });
 
   cursors = game.input.keyboard.createCursorKeys(); //Add default cursor keys
   //Add spacebar
@@ -127,7 +157,7 @@ function create() {
     layer.resizeWorld();
   });
 
-  var socket = io('workstation30:3000');
+  var socket = io('localhost:3000');
   socket.on('connected',function(data){
     userId=data;
     setInterval(function(){
@@ -141,157 +171,200 @@ function create() {
 }
 function update() {
 
-  layers.forEach(function(layer) {
-    game.physics.arcade.collide(player, layer);
-    game.physics.arcade.collide(skeleton, layer);
-  });
 
-  game.physics.arcade.collide(player, doorMap, enterDoor);
+    layers.forEach(function(layer) {
+      game.physics.arcade.collide(player, layer);
+    });
 
-  //game.physics.arcade.collide(player, skeleton, hitSkeleton(player, skeleton), null, this);
-  game.physics.arcade.moveToObject(skeleton, player);
+    game.physics.arcade.collide(player, doorMap, enterDoor);
 
-  angle = game.physics.arcade.angleToXY(skeleton, player.body.position.x, player.body.position.y) * 57.2956455309;
 
-  game.debug.text(angle, 600, 14, "#00ff00");
+    skeletons.forEach(function(skeleton) {
 
-  if((angle >= 135 && angle <= 180) || (angle >= -45 && angle <= 45) || (angle <= -135 && angle >= -180) || (skeleton.body.blocked.up || skeleton.body.blocked.down)) {
-    skeleton.body.maxVelocity = new Phaser.Point(60, 0);
-    if(angle <= 45 && angle >= -45)
-      skeleton.body.velocity.x = 64;
-    else
-      skeleton.body.velocity.x = -64;
-  } else if((angle > 45 && angle < 135) || (angle >= -135 && angle <= -45) || (skeleton.body.blocked.left || skeleton.body.blocked.right)) {
-    skeleton.body.maxVelocity = new Phaser.Point(0, 60);
-    if(angle > -135 && angle < -45)
-      skeleton.body.velocity.y = -64;
-    else
-      skeleton.body.velocity.y = 64;
+      layers.forEach(function(layer) {
+        game.physics.arcade.collide(skeleton, layer);
+      });
+
+      skeletons.forEach(function(subSkele) {
+        game.physics.arcade.collide(skeleton, subSkele);
+      });
+
+      if(!skeleton.properties.locked) {
+
+        game.physics.arcade.moveToObject(skeleton, player);
+
+        angle = game.physics.arcade.angleToXY(skeleton, player.body.position.x, player.body.position.y) * 57.2956455309;
+
+        skeleton.properties.area.x = skeleton.body.position.x;
+        skeleton.properties.area.y = skeleton.body.position.y;
+
+        //game.debug.text(angle, 600, 14, "#00ff00");
+
+        if((angle >= 135 && angle <= 180) || (angle >= -45 && angle <= 45) || (angle <= -135 && angle >= -180) || (skeleton.body.blocked.up || skeleton.body.blocked.down)) {
+          skeleton.body.maxVelocity = new Phaser.Point(60, 0);
+          if(angle <= 45 && angle >= -45)
+            skeleton.body.velocity.x = 64;
+          else
+            skeleton.body.velocity.x = -64;
+        } else if((angle > 45 && angle < 135) || (angle >= -135 && angle <= -45) || (skeleton.body.blocked.left || skeleton.body.blocked.right)) {
+          skeleton.body.maxVelocity = new Phaser.Point(0, 60);
+          if(angle > -135 && angle < -45)
+            skeleton.body.velocity.y = -64;
+          else
+            skeleton.body.velocity.y = 64;
+        }
+
+        if(skeleton.deltaX < 0) {
+          skeleton.animations.play('left');
+          skeleton.properties.direction = 'left';
+        } else if(skeleton.deltaX > 0) {
+          skeleton.animations.play('right');
+          skeleton.properties.direction = 'right';
+        } else if(skeleton.deltaY > 0) {
+          skeleton.animations.play('down');
+          skeleton.properties.direction = 'down';
+        } else if(skeleton.deltaY < 0) {
+          skeleton.animations.play('up');
+          skeleton.properties.direction = 'up';
+        } else {
+          skeleton.animations.stop();
+        }
+      }
+
+      if(skeleton.properties.area.contains(player.body.position.x, player.body.position.y)) {
+
+        skeleton.animations.play('attack-' + skeleton.properties.direction);
+        skeleton.properties.locked = true;
+        skeleton.body.velocity.x = 0;
+        skeleton.body.velocity.y = 0;
+
+        playerProp.health -= .5;
+
+      } else {
+        skeleton.properties.locked = false;
+      }
+
+    });
+
+    if(playerProp.health <= 0) {
+      killPlayer();
+    }
+
+    if(!playerProp.locked && player.alive) {
+
+      player.body.velocity.set(0);
+      playerProp.speed = 64;
+      playerProp.radius = new Phaser.Circle(player.position.x, player.position.y, 32);
+
+      if(game.input.keyboard.isDown(Phaser.Keyboard.SHIFT))
+        playerProp.speed = 128
+
+      if (cursors.left.isDown)
+      {
+        if(game.input.keyboard.isDown(Phaser.Keyboard.SPACEBAR)) {
+          //Attack
+          player.body.velocity.x = playerProp.speed * -.33; //1/3 speed whilst attacking
+          player.animations.play('attack-left');
+        } else {
+
+          player.body.velocity.x = playerProp.speed * -1;
+          player.animations.play('left');
+
+          playerProp.direction = 'left';
+        }
+      }
+      else if (cursors.right.isDown)
+      {
+        if(game.input.keyboard.isDown(Phaser.Keyboard.SPACEBAR)) {
+          //Attack
+          player.body.velocity.x = playerProp.speed * .33; //1/3 speed whilst attacking
+          player.animations.play('attack-right');
+        } else {
+
+          player.body.velocity.x = playerProp.speed;
+          player.animations.play('right');
+
+          playerProp.direction = 'right';
+        }
+      }
+      else if (cursors.up.isDown)
+      {
+        if(game.input.keyboard.isDown(Phaser.Keyboard.SPACEBAR)) {
+          //Attack
+          player.body.velocity.y = playerProp.speed * -.33; //1/3 speed whilst attacking
+          player.animations.play('attack-up');
+        } else {
+
+          player.body.velocity.y = playerProp.speed * -1;
+          player.animations.play('up');
+
+          playerProp.direction = 'up';
+        }
+      }
+      else if (cursors.down.isDown)
+      {
+        if(game.input.keyboard.isDown(Phaser.Keyboard.SPACEBAR)) {
+          //Attack
+          player.body.velocity.y = playerProp.speed * .33; //1/3 speed whilst attacking
+          player.animations.play('attack-down');
+        } else {
+
+          player.body.velocity.y = playerProp.speed;
+          player.animations.play('down');
+
+          playerProp.direction = 'down';
+        }
+      }
+      else
+      {
+        if(game.input.keyboard.isDown(Phaser.Keyboard.SPACEBAR)) {
+          //Not moving but still attacking
+          player.animations.play('attack-' + playerProp.direction);
+
+        } else {
+          player.animations.stop();
+        }
+      }
+    }
+
+    health.scale.x = playerProp.health / 100;
+
+  	//game.debug.bodyInfo(player, 16, 24);
+  	//game.debug.bodyInfo(skeleton, 16, 150);
+
+  	game.debug.text(game.time.fps, 2, 14, "#00ff00");
+
   }
 
-  if(skeleton.deltaX < 0) {
-    skeleton.animations.play('left');
-  } else if(skeleton.deltaX > 0) {
-    skeleton.animations.play('right');
-  } else if(skeleton.deltaY > 0) {
-    skeleton.animations.play('down');
-  } else if(skeleton.deltaY < 0) {
-    skeleton.animations.play('up');
-  } else {
-    skeleton.animations.stop();
-  }
+  function enterDoor() {
 
-  if(!playerProp.locked) {
+    game.camera.unfollow();
+    var houseExit = new Phaser.Point(840, 732);
+    var houseEnt = new Phaser.Point(168, 732);
+    var area = new Phaser.Rectangle(player.position.x, player.position.y, 32, 32);
 
-    player.body.velocity.set(0);
-    playerProp.speed = 64;
+    playerProp.locked = true;
 
-    if(game.input.keyboard.isDown(Phaser.Keyboard.SHIFT))
-      playerProp.speed = 128
+    player.animations.play('down');
+    player.animations.stop();
 
-    if (cursors.left.isDown)
-    {
-      if(game.input.keyboard.isDown(Phaser.Keyboard.SPACEBAR)) {
-        //Attack
-        player.body.velocity.x = playerProp.speed * -.33; //1/3 speed whilst attacking
-        player.animations.play('attack-left');
-      } else {
+    console.log(houseExit, player.position);
 
-        player.body.velocity.x = playerProp.speed * -1;
-        player.animations.play('left');
-
-        playerProp.direction = 'left';
-      }
+    if(area.contains(houseEnt.x, houseEnt.y)) {
+      //Need to see if in radius, rather than a specific point
+      player.body.position = houseExit;
+      //insideMap.visible = true;
+    } else {
+      player.body.position = houseEnt;
+      //insideMap.visible = false;
     }
-    else if (cursors.right.isDown)
-    {
-      if(game.input.keyboard.isDown(Phaser.Keyboard.SPACEBAR)) {
-        //Attack
-        player.body.velocity.x = playerProp.speed * .33; //1/3 speed whilst attacking
-        player.animations.play('attack-right');
-      } else {
 
-        player.body.velocity.x = playerProp.speed;
-        player.animations.play('right');
+    game.add.tween(game.camera).to({ x: player.body.position.x - game.camera.width / 2, y: player.body.position.y }, 750, Phaser.Easing.Quadratic.InOut, true).onComplete.add(() => {
+      //Fix issue of not going to correct place
+      game.camera.follow(player);
+      playerProp.locked = false;
+    });
 
-        playerProp.direction = 'right';
-      }
-    }
-    else if (cursors.up.isDown)
-    {
-      if(game.input.keyboard.isDown(Phaser.Keyboard.SPACEBAR)) {
-        //Attack
-        player.body.velocity.y = playerProp.speed * -.33; //1/3 speed whilst attacking
-        player.animations.play('attack-up');
-      } else {
-
-        player.body.velocity.y = playerProp.speed * -1;
-        player.animations.play('up');
-
-        playerProp.direction = 'up';
-      }
-    }
-    else if (cursors.down.isDown)
-    {
-      if(game.input.keyboard.isDown(Phaser.Keyboard.SPACEBAR)) {
-        //Attack
-        player.body.velocity.y = playerProp.speed * .33; //1/3 speed whilst attacking
-        player.animations.play('attack-down');
-      } else {
-
-        player.body.velocity.y = playerProp.speed;
-        player.animations.play('down');
-
-        playerProp.direction = 'down';
-      }
-    }
-    else
-    {
-      if(game.input.keyboard.isDown(Phaser.Keyboard.SPACEBAR)) {
-        //Not moving but still attacking
-        player.animations.play('attack-' + playerProp.direction);
-
-      } else {
-        player.animations.stop();
-      }
-    }
-  }
-
-	game.debug.bodyInfo(player, 16, 24);
-	game.debug.bodyInfo(skeleton, 16, 150);
-
-	game.debug.text(game.time.fps, 2, 14, "#00ff00");
-
-}
-
-function enterDoor() {
-
-  game.camera.unfollow();
-  var houseExit = new Phaser.Point(840, 732);
-  var houseEnt = new Phaser.Point(168, 732);
-  var area = new Phaser.Rectangle(player.position.x, player.position.y, 32, 32);
-
-  playerProp.locked = true;
-
-  player.animations.play('down');
-  player.animations.stop();
-
-  console.log(houseExit, player.position);
-
-  if(area.contains(houseEnt.x, houseEnt.y)) {
-    //Need to see if in radius, rather than a specific point
-    player.body.position = houseExit;
-    insideMap.visible = true;
-  } else {
-    player.body.position = houseEnt;
-    insideMap.visible = false;
-  }
-
-  game.add.tween(game.camera).to({ x: player.body.position.x - game.camera.width / 2, y: player.body.position.y }, 750, Phaser.Easing.Quadratic.InOut, true).onComplete.add(() => {
-    //Fix issue of not going to correct place
-    game.camera.follow(player);
-    playerProp.locked = false;
-  });
 
 }
 
@@ -328,4 +401,20 @@ function updatePlayers(serverData){
       enemies[propt].animations.stop();
     //game.add.tween(enemies[propt]).to( { x: serverData[propt].x, y: serverData[propt].y }, 30, Phaser.Easing.NONE, true);
   }
+}
+
+function killPlayer() {
+  dieAnim.play(6, true);
+  if (dieAnim.loopCount === 1)
+  {
+
+  dieAnim.loop = false;
+
+  player.kill();
+  skeletons.forEach(function(skeleton) {
+    skeleton.body.velocity.x = 0;
+    skeleton.body.velocity.y = 0;
+    skeleton.animations.stop();
+  });
+}
 }
