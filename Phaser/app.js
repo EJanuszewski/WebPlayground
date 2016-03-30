@@ -1,4 +1,4 @@
-var cursors, player, layers = [], tickRate, map, spacebar, radians, doorMap;
+var cursors, player, layers = [], tickRate, map, spacebar, radians, doorMap, insideMap;
 
 var enemies = {},
     tickrate = 33;
@@ -27,6 +27,9 @@ function preload() {
   game.load.tilemap('collide-2', 'assets/tilemap/city_Collide_2.csv', null, Phaser.Tilemap.CSV);
   game.load.tilemap('collide-3', 'assets/tilemap/city_Collide_3.csv', null, Phaser.Tilemap.CSV);
 
+  //Load inside layer
+  game.load.tilemap('inside', 'assets/tilemap/city_Inside.csv', null, Phaser.Tilemap.CSV);
+
   //Tilemap image
   game.load.image('tiles', 'assets/tilemap/magecity.png');
 
@@ -41,7 +44,7 @@ function preload() {
 function create() {
 
   var tilemaps = [
-    'layer-1', 'collide-1', 'collide-2', 'layer-2'
+    'layer-1', 'collide-1', 'collide-2', 'layer-2', 'inside'
   ];
 
   tilemaps.forEach(function(tilemap, i) {
@@ -59,6 +62,11 @@ function create() {
     if(tilemap === 'layer-2') {
       map.setCollision(326);
       doorMap = layer;
+    }
+
+    if(tilemap === 'inside') {
+      layer.visible = false;
+      insideMap = layer;
     }
   });
 
@@ -119,7 +127,7 @@ function create() {
     layer.resizeWorld();
   });
 
-  var socket = io('localhost:3000');
+  var socket = io('workstation30:3000');
   socket.on('connected',function(data){
     userId=data;
     setInterval(function(){
@@ -261,6 +269,7 @@ function enterDoor() {
   game.camera.unfollow();
   var houseExit = new Phaser.Point(840, 732);
   var houseEnt = new Phaser.Point(168, 732);
+  var area = new Phaser.Rectangle(player.position.x, player.position.y, 32, 32);
 
   playerProp.locked = true;
 
@@ -269,14 +278,16 @@ function enterDoor() {
 
   console.log(houseExit, player.position);
 
-  if(player.position.x > houseEnt.x) {
+  if(area.contains(houseEnt.x, houseEnt.y)) {
     //Need to see if in radius, rather than a specific point
     player.body.position = houseExit;
+    insideMap.visible = true;
   } else {
     player.body.position = houseEnt;
+    insideMap.visible = false;
   }
 
-  game.add.tween(game.camera).to(player.body.position, 750, Phaser.Easing.Quadratic.InOut, true).onComplete.add(() => {
+  game.add.tween(game.camera).to({ x: player.body.position.x - game.camera.width / 2, y: player.body.position.y }, 750, Phaser.Easing.Quadratic.InOut, true).onComplete.add(() => {
     //Fix issue of not going to correct place
     game.camera.follow(player);
     playerProp.locked = false;
